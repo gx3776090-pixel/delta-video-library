@@ -1,22 +1,10 @@
 {
   "videos": [
     {
-      "title": "示例视频1 - 护航实战",
-      "url": "https://your-video-url-here.mp4",
-      "cover": "https://your-cover-url-here.jpg",
+      "title": "飙头帮 - 护航实录",
+      "url": "https://delta-videos-1426820075.cos.ap-guangzhou.myqcloud.com/%E6%96%A7%E5%A4%B4%E5%B8%AE.mp4",
+      "cover": "https://delta-videos-1426820075.cos.ap-guangzhou.myqcloud.com/%E6%96%A7%E5%A4%B4%E5%B8%AE-%E5%B0%81%E9%9D%A2.jpg",
       "category": "护航"
-    },
-    {
-      "title": "示例视频2 - 代肝实录",
-      "url": "https://your-video-url-here.mp4",
-      "cover": "https://your-cover-url-here.jpg",
-      "category": "代肝"
-    },
-    {
-      "title": "示例视频3 - 回收展示",
-      "url": "https://your-video-url-here.mp4",
-      "cover": "https://your-cover-url-here.jpg",
-      "category": "回收"
     }
   ]
 }
