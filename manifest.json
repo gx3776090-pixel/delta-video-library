@@ -1,0 +1,22 @@
+{
+  "videos": [
+    {
+      "title": "示例视频1 - 护航实战",
+      "url": "https://your-video-url-here.mp4",
+      "cover": "https://your-cover-url-here.jpg",
+      "category": "护航"
+    },
+    {
+      "title": "示例视频2 - 代肝实录",
+      "url": "https://your-video-url-here.mp4",
+      "cover": "https://your-cover-url-here.jpg",
+      "category": "代肝"
+    },
+    {
+      "title": "示例视频3 - 回收展示",
+      "url": "https://your-video-url-here.mp4",
+      "cover": "https://your-cover-url-here.jpg",
+      "category": "回收"
+    }
+  ]
+}
