@@ -151,17 +151,11 @@ let filtered = [];
 let currentIndex = 0;
 let currentFilter = 'all';
 
-async function loadManifest() {
-  try {
-    const res = await fetch('manifest.json?_=' + Date.now());
-    manifest = await res.json();
-    filtered = [...manifest];
-    renderVideos();
-    document.getElementById('totalCount').textContent = manifest.length;
-  } catch(e) {
-    document.getElementById('videoGrid').innerHTML = '<div class="empty-state"><h3>⚠️ 视频库为空</h3><p>请上传视频到 COS 并编辑 manifest.json 添加视频条目</p></div>';
-  }
-}
+const _manifestStr = "{\n  \"videos\": [\n    {\n      \"title\": \"\u98d9\u5934\u5e2e - \u62a4\u822a\u5b9e\u5f55\",\n      \"url\": \"https://delta-videos-1426820075.cos.ap-guangzhou.myqcloud.com/%E6%96%A7%E5%A4%B4%E5%B8%AE.mp4\",\n      \"cover\": \"https://delta-videos-1426820075.cos.ap-guangzhou.myqcloud.com/%E6%96%A7%E5%A4%B4%E5%B8%AE-%E5%B0%81%E9%9D%A2.jpg\",\n      \"category\": \"\u62a4\u822a\"\n    }\n  ]\n}";
+const manifest = JSON.parse(_manifestStr);
+let filtered = [...manifest.videos];
+let currentFilter = 'all';
+let currentIndex = 0;
 
 function renderVideos() {
   const grid = document.getElementById('videoGrid');
@@ -172,19 +166,18 @@ function renderVideos() {
   grid.innerHTML = filtered.map((v, i) => `
     <div class="video-card" onclick="openVideo(${i})">
       <div class="video-thumb">
-        ${v.thumbnail ? `<img src="${v.thumbnail}" alt="">` : ''}
+        ${v.cover ? `<img src="${v.cover}" alt="">` : '<div style="width:100%;height:100%;background:#1a1a3a;display:flex;align-items:center;justify-content:center;font-size:40px;">🎮</div>'}
         <div class="play-icon"></div>
-        ${v.duration ? `<span class="duration">${v.duration}</span>` : ''}
       </div>
       <div class="video-info">
         <div class="video-title">${v.title}</div>
         <div class="video-meta">
           ${v.category ? `<span class="tag">${v.category}</span>` : ''}
-          ${v.date ? `<span>${v.date}</span>` : ''}
         </div>
       </div>
     </div>
   `).join('');
+  document.getElementById('totalCount').textContent = filtered.length;
 }
 
 function openVideo(index) {
@@ -206,12 +199,8 @@ function closeModal() {
   document.getElementById('videoPlayer').src = '';
 }
 
-function playNext() {
-  if (currentIndex < filtered.length - 1) openVideo(currentIndex + 1);
-}
-function playPrev() {
-  if (currentIndex > 0) openVideo(currentIndex - 1);
-}
+function playNext() { if (currentIndex < filtered.length - 1) openVideo(currentIndex + 1); }
+function playPrev() { if (currentIndex > 0) openVideo(currentIndex - 1); }
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
@@ -219,29 +208,26 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') playPrev();
 });
 
-// 分类筛选
 document.querySelectorAll('.nav-btn[data-filter]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentFilter = btn.dataset.filter;
     document.getElementById('currentCategory').textContent = currentFilter === 'all' ? '全部' : currentFilter;
-    filtered = currentFilter === 'all' ? [...manifest] : manifest.filter(v => v.category === currentFilter);
+    filtered = currentFilter === 'all' ? [...manifest.videos] : manifest.videos.filter(v => v.category === currentFilter);
     renderVideos();
   });
 });
 
-// 搜索
 document.getElementById('searchInput').addEventListener('input', e => {
   const q = e.target.value.trim().toLowerCase();
-  filtered = manifest.filter(v =>
+  filtered = manifest.videos.filter(v =>
     v.title.toLowerCase().includes(q) &&
     (currentFilter === 'all' || v.category === currentFilter)
   );
   renderVideos();
 });
 
-loadManifest();
-</script>
+renderVideos();</script>
 </body>
 </html>
