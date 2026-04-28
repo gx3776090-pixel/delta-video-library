@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三角洲俱乐部 · 视频库</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: #0a0a1a; color: #fff; min-height: 100vh; }
+
+/* 顶部导航 */
+header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 40px; position: sticky; top: 0; z-index: 100; }
+.nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.logo { font-size: 20px; font-weight: 700; color: #e94560; letter-spacing: 2px; }
+.logo span { color: #fff; }
+.nav-links { display: flex; gap: 8px; }
+.nav-btn { padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; background: transparent; color: #aaa; }
+.nav-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-btn.active { background: #e94560; color: #fff; }
+
+/* 搜索栏 */
+.search-bar { background: #111127; padding: 20px 40px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.search-inner { max-width: 1200px; margin: 0 auto; }
+.search-input-wrap { position: relative; max-width: 600px; margin: 0 auto; }
+.search-input-wrap input { width: 100%; padding: 14px 50px 14px 20px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; font-size: 15px; outline: none; transition: border 0.2s; }
+.search-input-wrap input:focus { border-color: #e94560; }
+.search-input-wrap input::placeholder { color: #666; }
+.search-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+
+/* 视频网格 */
+.container { max-width: 1200px; margin: 40px auto; padding: 0 40px; }
+.section-title { font-size: 18px; font-weight: 600; margin-bottom: 24px; color: #ccc; }
+.section-title span { color: #e94560; }
+
+/* 空状态 */
+.empty-state { text-align: center; padding: 80px 20px; color: #666; }
+.empty-state h3 { font-size: 20px; margin-bottom: 12px; color: #888; }
+.empty-state p { font-size: 14px; }
+
+/* 视频卡片网格 */
+.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+.video-card { background: #12122a; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
+.video-card:hover { transform: translateY(-4px); border-color: rgba(233,69,96,0.4); }
+.video-thumb { position: relative; aspect-ratio: 16/9; background: #1a1a3a; overflow: hidden; }
+.video-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.video-thumb .duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.video-thumb .play-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); transition: background 0.2s; }
+.video-thumb .play-icon:hover { background: rgba(0,0,0,0.5); }
+.video-thumb .play-icon::after { content: '▶'; font-size: 36px; color: #fff; }
+.video-card:hover .play-icon { background: rgba(233,69,96,0.3); }
+.video-info { padding: 16px; }
+.video-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.video-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #888; margin-top: 8px; }
+.video-meta .tag { background: rgba(233,69,96,0.15); color: #e94560; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+/* 视频播放器弹窗 */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; }
+.modal.show { display: flex; align-items: center; justify-content: center; }
+.modal-content { width: 90%; max-width: 1000px; background: #12122a; border-radius: 16px; overflow: hidden; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.modal-title { font-size: 16px; font-weight: 600; color: #fff; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 16px; }
+.modal-close { width: 36px; height: 36px; border-radius: 8px; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+.modal-close:hover { background: #e94560; }
+.modal-body { position: relative; background: #000; }
+.modal-body video { width: 100%; max-height: 70vh; display: block; }
+.modal-desc { padding: 20px 24px; color: #aaa; font-size: 14px; line-height: 1.8; }
+.modal-nav { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+.modal-nav-btn { padding: 8px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: #aaa; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.modal-nav-btn:hover { border-color: #e94560; color: #e94560; }
+.modal-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* 统计栏 */
+.stats-bar { display: flex; align-items: center; gap: 32px; padding: 16px 0; font-size: 13px; color: #666; }
+.stats-bar strong { color: #e94560; font-size: 16px; }
+
+/* 页脚 */
+footer { text-align: center; padding: 40px; color: #444; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
+
+/* 加载动画 */
+.loading { text-align: center; padding: 60px; color: #666; }
+@media (max-width: 768px) {
+  header { padding: 0 16px; }
+  .container { padding: 0 16px; }
+  .nav-links { gap: 4px; }
+  .nav-btn { padding: 8px 12px; font-size: 13px; }
+  .video-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<header>
+  <div class="nav-inner">
+    <div class="logo">三角<span>洲</span>俱乐部</div>
+    <div class="nav-links">
+      <button class="nav-btn active" data-filter="all">全部</button>
+      <button class="nav-btn" data-filter="教程">教程</button>
+      <button class="nav-btn" data-filter="活动">活动</button>
+      <button class="nav-btn" data-filter="内部">内部</button>
+      <button class="nav-btn" data-filter="其他">其他</button>
+    </div>
+  </div>
+</header>
+
+<!-- 搜索 -->
+<div class="search-bar">
+  <div class="search-inner">
+    <div class="search-input-wrap">
+      <input type="text" id="searchInput" placeholder="搜索视频标题…" autocomplete="off">
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+</div>
+
+<!-- 内容 -->
+<div class="container">
+  <div class="stats-bar">
+    共 <strong id="totalCount">0</strong> 个视频
+    · 当前分类 <strong id="currentCategory">全部</strong>
+  </div>
+  <div id="videoGrid" class="video-grid">
+    <div class="loading">加载中…</div>
+  </div>
+</div>
+
+<!-- 播放器弹窗 -->
+<div class="modal" id="videoModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">视频标题</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <video id="videoPlayer" controls autoplay></video>
+    </div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-nav">
+      <button class="modal-nav-btn" id="prevBtn" onclick="playPrev()">◀ 上一个</button>
+      <span id="navInfo" style="color:#666;font-size:13px;"></span>
+      <button class="modal-nav-btn" id="nextBtn" onclick="playNext()">下一个 ▶</button>
+    </div>
+  </div>
+</div>
+
+<footer>三角洲俱乐部 · 视频库 © 2026</footer>
+
+<script>
+let manifest = [];
+let filtered = [];
+let currentIndex = 0;
+let currentFilter = 'all';
+
+async function loadManifest() {
+  try {
+    const res = await fetch('manifest.json?_=' + Date.now());
+    manifest = await res.json();
+    filtered = [...manifest];
+    renderVideos();
+    document.getElementById('totalCount').textContent = manifest.length;
+  } catch(e) {
+    document.getElementById('videoGrid').innerHTML = '<div class="empty-state"><h3>⚠️ 视频库为空</h3><p>请上传视频到 COS 并编辑 manifest.json 添加视频条目</p></div>';
+  }
+}
+
+function renderVideos() {
+  const grid = document.getElementById('videoGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><h3>🔍 没有找到相关视频</h3><p>试试其他关键词或切换分类</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map((v, i) => `
+    <div class="video-card" onclick="openVideo(${i})">
+      <div class="video-thumb">
+        ${v.thumbnail ? `<img src="${v.thumbnail}" alt="">` : ''}
+        <div class="play-icon"></div>
+        ${v.duration ? `<span class="duration">${v.duration}</span>` : ''}
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">
+          ${v.category ? `<span class="tag">${v.category}</span>` : ''}
+          ${v.date ? `<span>${v.date}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openVideo(index) {
+  currentIndex = index;
+  const v = filtered[index];
+  document.getElementById('modalTitle').textContent = v.title;
+  document.getElementById('modalDesc').textContent = v.description || '';
+  document.getElementById('videoPlayer').src = v.url;
+  document.getElementById('navInfo').textContent = `${index + 1} / ${filtered.length}`;
+  document.getElementById('prevBtn').disabled = index === 0;
+  document.getElementById('nextBtn').disabled = index === filtered.length - 1;
+  document.getElementById('videoModal').classList.add('show');
+  document.getElementById('videoPlayer').play();
+}
+
+function closeModal() {
+  document.getElementById('videoModal').classList.remove('show');
+  document.getElementById('videoPlayer').pause();
+  document.getElementById('videoPlayer').src = '';
+}
+
+function playNext() {
+  if (currentIndex < filtered.length - 1) openVideo(currentIndex + 1);
+}
+function playPrev() {
+  if (currentIndex > 0) openVideo(currentIndex - 1);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowRight') playNext();
+  if (e.key === 'ArrowLeft') playPrev();
+});
+
+// 分类筛选
+document.querySelectorAll('.nav-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    document.getElementById('currentCategory').textContent = currentFilter === 'all' ? '全部' : currentFilter;
+    filtered = currentFilter === 'all' ? [...manifest] : manifest.filter(v => v.category === currentFilter);
+    renderVideos();
+  });
+});
+
+// 搜索
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  filtered = manifest.filter(v =>
+    v.title.toLowerCase().includes(q) &&
+    (currentFilter === 'all' || v.category === currentFilter)
+  );
+  renderVideos();
+});
+
+loadManifest();
+</script>
+</body>
+</html>
